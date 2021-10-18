@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 
-const Book = mongoose.model('Book', {
+// Using the Schema mongoose method to define my book model
+// It'll also allow later to easily use mongoose middleware
+const bookSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
@@ -21,5 +23,7 @@ const Book = mongoose.model('Book', {
     trim: true
   }
 })
+
+const Book = mongoose.model('Book', bookSchema);
 
 module.exports = Book;
