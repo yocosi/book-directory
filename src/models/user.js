@@ -10,7 +10,13 @@ const userSchema = new mongoose.Schema({
     trim: true
   },
   age: {
-    type: Number
+    type: Number,
+    default: 0,
+    validate(value) {
+      if (value < 0) {
+        throw new Error('Age must be a positive number!');
+      }
+    }
   },
   email: {
     type: String,
