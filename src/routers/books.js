@@ -1,10 +1,14 @@
 const express = require('express');
 const Book = require('../models/book');
+const auth = require('../middlewares/auth');
 const router = new express.Router();
 
 // Creating endpoint to create a book item
-router.post('/books', async (req, res) => {
-  const books = new Book(req.body);
+router.post('/books', auth, async (req, res) => {
+  const books = new Book({
+    ...req.body,
+    owner: req.user._id
+  })
 
   try {
     await books.save();
@@ -15,13 +19,9 @@ router.post('/books', async (req, res) => {
 })
 
 // Reading endpoint to find all the books
-router.get('/books', async (req, res) => {
+router.get('/books', auth, async (req, res) => {
   try {
-    const book = await Book.find({});
-
-    if (!book) {
-      return res.status(500).send({ error: "Unable to find books!" });
-    }
+    const book = await Book.find({ owner: req.user._id });
     res.send(book);
   } catch (error) {
     res.status(500).send();
@@ -29,23 +29,23 @@ router.get('/books', async (req, res) => {
 })
 
 // Reading endpoint to find a book by id
-router.get('/books/:id', async (req, res) => {
+router.get('/books/:id', auth, async (req, res) => {
   const _id = req.params.id;
 
   try {
-    const book = await Book.findById(_id);
+    const book = await Book.findOne({ _id: _id, owner: req.user._id });
 
     if (!book) {
-      return res.status(500).send();
+      return res.status(404).send();
     }
     res.send(book);
   } catch (error) {
-    res.status(400).send({ error: "Unable to find the book!" });
+    res.status(500).send({ error: "Unable to find the book!" });
   }
 })
 
 // Updating endpoint to update a book by id
-router.patch('/books/:id', async (req, res) => {
+router.patch('/books/:id', auth, async (req, res) => {
   const _id = req.params.id;
   const originalBook = req.body;
   const updates = Object.keys(originalBook);
@@ -59,7 +59,7 @@ router.patch('/books/:id', async (req, res) => {
   }
 
   try {
-    const book = await Book.findById(_id);
+    const book = await Book.findOne({ _id: _id, owner: req.user._id });
     updates.forEach((update) => {
       book[update] = originalBook[update];
     })
@@ -76,11 +76,11 @@ router.patch('/books/:id', async (req, res) => {
 })
 
 // Deleting endpoint to delete a book item by ID
-router.delete('/books/:id', async (req, res) => {
+router.delete('/books/:id', auth, async (req, res) => {
   const _id = req.params.id;
 
   try {
-    const book = await Book.findByIdAndDelete(_id);
+    const book = await Book.findOneAndDelete({ _id: _id, owner: req.user._id });
 
     if (!book) {
       return res.status(404).send({ error: "Unable to find the book!" });

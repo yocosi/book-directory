@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const Book = require('./book');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -43,6 +44,12 @@ const userSchema = new mongoose.Schema({
   }]
 })
 
+userSchema.virtual('books', {
+  ref: 'Book',
+  localField: '_id',
+  foreignField: 'owner'
+})
+
 userSchema.methods.toJSON = function () {
   const user = this;
   const userObject = user.toObject();
@@ -79,8 +86,11 @@ userSchema.statics.findByCredentials = async (email, password) => {
   return user;
 }
 
+/////////////////
+// MIDDLEWARES //
+////////////////
 
-// MIDDLEWARES
+// Hash the password while someone is signing up
 userSchema.pre('save', async function (next) {
   const user = this;
 
@@ -89,6 +99,15 @@ userSchema.pre('save', async function (next) {
   }
   next();
 })
+
+// When a user is deleted, also delete all the books that the user entered in the database
+userSchema.pre('remove', async function (next) {
+  const user = this;
+  await Book.deleteMany({ owner: user._id })
+  next();
+})
+
+
 
 const User = mongoose.model("User", userSchema);
 
