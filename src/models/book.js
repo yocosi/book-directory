@@ -1,3 +1,4 @@
+// Define the book model
 const mongoose = require('mongoose');
 
 // Using the Schema mongoose method to define my book model
@@ -22,11 +23,18 @@ const bookSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  genre: {
+    type: String,
+    required: true,
+    trim: true
+  },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: 'User'
   }
+}, {
+  timestamps: true
 })
 
 const Book = mongoose.model('Book', bookSchema);

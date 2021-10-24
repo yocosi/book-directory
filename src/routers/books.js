@@ -1,3 +1,4 @@
+// All the endpoints for book
 const express = require('express');
 const Book = require('../models/book');
 const auth = require('../middlewares/auth');
@@ -19,9 +20,19 @@ router.post('/books', auth, async (req, res) => {
 })
 
 // Reading endpoint to find all the books
+// GET /books?genre=cyberpunk ==> Filtering data with query string example
 router.get('/books', auth, async (req, res) => {
+  const match = {};
+
+  if (req.query.genre) {
+    match.genre = req.query.genre;
+  }
+
   try {
-    const book = await Book.find({ owner: req.user._id });
+    let book = await Book.find({ owner: req.user._id });
+    if (req.query.genre) {
+      book = await Book.find({ owner: req.user._id, genre: match.genre })
+    }
     res.send(book);
   } catch (error) {
     res.status(500).send();

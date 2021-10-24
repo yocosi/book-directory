@@ -1,3 +1,4 @@
+// All the endpoints for user
 const express = require('express');
 const User = require('../models/user');
 const auth = require('../middlewares/auth');
@@ -6,7 +7,7 @@ const router = new express.Router();
 // Creating endpoint to create a user
 router.post('/users', async (req, res) => {
   try {
-    const user = new User(req.body);
+    const user = new User(req.body); // Accessing the object who just got parsed
     const token = await user.generateAuthToken();
 
     if (!user) {
@@ -59,7 +60,7 @@ router.post('/users/logoutAll', auth, async (req, res) => {
   }
 })
 
-// Reading endpoint to read a user
+// Reading endpoint to fetch the user profile if he gets authenticated succesfully
 router.get('/users/me', auth, async (req, res) => {
   res.send(req.user);
 })
@@ -75,7 +76,7 @@ router.delete('/users/me', auth, async (req, res) => {
   }
 })
 
-// Updating endpoint to update a user by id
+// Updating endpoint to update an existing user
 router.patch('/users/me', auth, async (req, res) => {
   const originalUser = req.body;
   const updates = Object.keys(originalUser); // Take the object in and key will returns a array of strings where each is a property on that object

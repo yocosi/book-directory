@@ -1,3 +1,4 @@
+// Define the User model
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
@@ -44,12 +45,14 @@ const userSchema = new mongoose.Schema({
   }]
 })
 
+// Virtual property : A relationship between 2 entities. Here users and tasks
 userSchema.virtual('books', {
   ref: 'Book',
   localField: '_id',
   foreignField: 'owner'
 })
 
+// Hide private data to avoid showing those in public (password, etc)
 userSchema.methods.toJSON = function () {
   const user = this;
   const userObject = user.toObject();
@@ -60,6 +63,7 @@ userSchema.methods.toJSON = function () {
   return userObject;
 }
 
+// Generate a token for a user
 userSchema.methods.generateAuthToken = async function () {
   const user = this;
   const token = jwt.sign({ _id: user._id.toString() }, 'book-directory-token');
@@ -70,6 +74,7 @@ userSchema.methods.generateAuthToken = async function () {
   return token;
 }
 
+// Find a user thanks to his credentials (email and password) to allow him to login
 userSchema.statics.findByCredentials = async (email, password) => {
   const user = await User.findOne({ email: email });
 
@@ -92,7 +97,7 @@ userSchema.statics.findByCredentials = async (email, password) => {
 
 // Hash the password while someone is signing up
 userSchema.pre('save', async function (next) {
-  const user = this;
+  const user = this; // "this" gives access to the individual user who is about to be saved
 
   if (user.isModified('password')) {
     user.password = await bcrypt.hash(user.password, 8);
