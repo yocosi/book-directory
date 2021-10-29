@@ -54,7 +54,7 @@ If you have screenshots you'd like to share, include them here. -->
 Now, clone the repo on your machine and here's what you have to run to make the projects work:
 ```
 $ npm install
-$ npm start
+$ npm run dev
 ```
 
 <!--
